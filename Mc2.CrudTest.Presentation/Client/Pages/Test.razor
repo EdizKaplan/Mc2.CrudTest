@@ -1,0 +1,76 @@
+﻿@page "/test"
+@using FluentValidation
+@using Mc2.CrudTest.Presentation.Client.Controller
+@using Mc2.CrudTest.Presentation.Shared;
+@using PhoneNumbers;
+
+
+@code {
+    private CustomerViewModel customer = new CustomerViewModel();
+    private string errorMessage;
+
+    private async Task CreateCustomer()
+    {
+        if (IsValidCustomer(customer))
+        {
+            PhoneNumberUtil phoneUtil = PhoneNumberUtil.GetInstance();
+            try
+            {
+                string countryCode = "TR";
+                PhoneNumbers.PhoneNumber phoneNumber = phoneUtil.Parse(customer.PhoneNumber, countryCode);
+
+                bool isValidNumber = phoneUtil.IsValidNumber(phoneNumber);
+                errorMessage = "Success" + " " + isValidNumber + "";
+            }
+            catch(Exception ex)
+            {
+                errorMessage = ex.Message;
+            }
+        } 
+        else
+        {
+            errorMessage = "Please fill out all required fields correctly.";
+        }
+    }
+
+    bool IsValidCustomer(CustomerViewModel customer)
+    {
+        var validator = new CustomerValidator();
+        var result = validator.Validate(customer);
+        return true;
+    }
+}
+<h3>Create Customer</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+        <div class="alert alert-danger">@errorMessage</div>
+}
+
+
+<div class="form-group">
+    <label for="firstName">First Name:</label>
+    <input type="text" class="form-control" id="firstName" @bind="customer.FirstName" />
+</div>
+<div class="form-group">
+    <label for="lastName">Last Name:</label>
+    <input type="text" class="form-control" id="lastName" @bind="customer.LastName" />
+</div>
+<div class="form-group">
+    <label for="dateOfBirth">Date of Birth:</label>
+    <input type="date" class="form-control" id="dateOfBirth" @bind="customer.DateOfBirth" />
+</div>
+<div class="form-group">
+    <label for="phoneNumber">Phone Number:</label>
+    <input type="text" class="form-control" id="phoneNumber" @bind="customer.PhoneNumber" />
+</div>
+<div class="form-group">
+    <label for="email">Email:</label>
+    <input type="email" class="form-control" id="email" @bind="customer.Email" />
+</div>
+<div class="form-group">
+    <label for="bankAccountNumber">Bank Account Number:</label>
+    <input type="text" class="form-control" id="bankAccountNumber" @bind="customer.BankAccountNumber" />
+</div>
+
+<button class="btn btn-primary" @onclick="CreateCustomer">Submit</button>
